@@ -31,101 +31,31 @@
             </b-col>
             <b-col md="6">
               <b-form-group
-                label="Franchise Address"
+                label="Pickup Address"
                 label-for="fr_Address"
               >
+                <!-- <b v-if="user.franchiseData.id==13">59, Jalan Ros Merah 2/2, Taman Johor Jaya, 81100 Johor Bahru, Johor</b> -->
+                <!-- <b>Lot 8076, JP 12/24, Jalan Perdana 12, 83700 Yong Peng, Johor</b> -->
                 <b>{{ user.franchiseData.address }}</b>
               </b-form-group>
             </b-col>
           </b-row>
           <b-row>
-            <b-col
-              cols="12"
-              class="mb-2"
-            >
-              <h5 class="mb-0">
-                Sender
-              </h5>
-            </b-col>
-            <b-col md="3">
+              <b-col md="4">
               <b-form-group
-                label="Name"
-                label-for="origin_name"
+                label="Remarks"
+                label-for="remarks"
               >
                 <validation-provider
                   #default="{ errors }"
-                  name="Origin Name"
+                  name="Remarks"
                   rules="required"
                 >
                   <b-form-input
-                    id="origin_name"
-                    v-model="post.origin_name"
+                    id="remarks"
+                    v-model="post.remarks"
                     :state="errors.length > 0 ? false:null"
-                    placeholder="Name"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="3">
-              <b-form-group
-                label="Phone"
-                label-for="origin_phone"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Origin Phone"
-                  rules="required|integer"
-                >
-                  <b-form-input
-                    id="origin_phone"
-                    v-model="post.origin_phone"
-                    type="phone"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="60000000000"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="4">
-              <b-form-group
-                label="Address"
-                label-for="origin_address"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Origin Address"
-                  rules="required"
-                >
-                  <b-form-input
-                    id="origin_address"
-                    v-model="post.origin_address"
-                    type="text"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="Address"
-                    @change="addressChangedOrigin"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="2">
-              <b-form-group
-                label="Postal"
-                label-for="origin_postal"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Origin Postal"
-                  rules="required|integer"
-                >
-                  <b-form-input
-                    id="origin_postal"
-                    v-model="post.origin_postal"
-                    type="postal"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="Postal"
+                    placeholder="Remarks"
                   />
                   <small class="text-danger">{{ errors[0] }}</small>
                 </validation-provider>
@@ -161,7 +91,7 @@
                 </validation-provider>
               </b-form-group>
             </b-col>
-            <b-col md="3">
+            <b-col md="2">
               <b-form-group
                 label="Phone"
                 label-for="destination_phone"
@@ -176,7 +106,7 @@
                     v-model="post.destination_phone"
                     type="phone"
                     :state="errors.length > 0 ? false:null"
-                    placeholder="60000000000"
+                    placeholder="65000000000"
                   />
                   <small class="text-danger">{{ errors[0] }}</small>
                 </validation-provider>
@@ -205,7 +135,69 @@
               </b-form-group>
 
             </b-col>
-            <b-col md="2">
+            <b-col md="3">
+              <b-form-group
+                label="Address Unit"
+                label-for="destination_address_unit"
+              >
+                <validation-provider
+                  #default="{ errors }"
+                  name="Destination Address Unit"
+                  rules="required"
+                >
+                  <b-form-input
+                    id="destination_address_unit"
+                    v-model="post.destination_address_unit"
+                    type="text"
+                    :state="errors.length > 0 ? false:null"
+                    placeholder="Address No. | Block No. | Road No."
+                  />
+                  <small class="text-danger">{{ errors[0] }}</small>
+                </validation-provider>
+              </b-form-group>
+
+            </b-col>
+            <b-col md="4">
+              <b-form-group
+                label="City"
+                label-for="destination_city"
+              >
+                <validation-provider
+                  #default="{ errors }"
+                  name="Destination City"
+                  rules="required"
+                >
+                  <b-form-input
+                    id="destination_city"
+                    v-model="post.destination_city"
+                    :state="errors.length > 0 ? false:null"
+                    placeholder="City"
+                  />
+                  <small class="text-danger">{{ errors[0] }}</small>
+                </validation-provider>
+              </b-form-group>
+            </b-col>
+             <b-col md="4">
+              <b-form-group
+                label="State"
+                label-for="destination_state"
+              >
+                <validation-provider
+                  #default="{ errors }"
+                  name="Destination State"
+                  rules="required"
+                >
+                  <b-form-input
+                    id="destination_state"
+                    v-model="post.destination_state"
+                    :state="errors.length > 0 ? false:null"
+                    placeholder="State"
+                  />
+                  <small class="text-danger">{{ errors[0] }}</small>
+                </validation-provider>
+              </b-form-group>
+            </b-col>
+            <b-col md="4">
               <b-form-group
                 label="Postal"
                 label-for="destination_postal"
@@ -228,23 +220,6 @@
             </b-col>
           </b-row>
           <b-row>
-            <GmapMap
-              v-if="post.destination_address"
-              :center="locations.destination.center"
-              :zoom="locations.destination.center.zoom"
-              map-type-id="terrain"
-              style="width:100%;height:300px"
-            >
-              <GmapMarker
-                :key="'markerdest'"
-                :position="locations.destination.position"
-                :clickable="true"
-                :draggable="true"
-                @drag="updateCoordinatesDestination"
-              />
-            </GmapMap>
-          </b-row>
-          <b-row>
             <b-col
               cols="12"
               class="mb-2"
@@ -255,37 +230,19 @@
             </b-col>
             <b-col md="4">
               <b-form-group
-                label="SKU"
-                label-for="sku"
+                label="Weight"
+                label-for="weight"
               >
                 <validation-provider
                   #default="{ errors }"
-                  name="SKU"
+                  name="WEIGHT"
                 >
                   <b-form-input
-                    id="sku"
-                    v-model="post.sku"
+                    id="weight"
+                    v-model="post.weight"
                     :state="errors.length > 0 ? false:null"
-                    placeholder="SKU"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="4">
-              <b-form-group
-                label="Remarks"
-                label-for="remarks"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Remarks"
-                >
-                  <b-form-input
-                    id="remarks"
-                    v-model="post.remarks"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="Remarks"
+                    placeholder="1"
+                    type="number"
                   />
                   <small class="text-danger">{{ errors[0] }}</small>
                 </validation-provider>
@@ -377,8 +334,11 @@ export default {
   data() {
     return {
       mindate: moment().format('YYYY-MM-DD HH:mm'),
+      preview: null,
       post: {
+        photo: {},
         qty: 1,
+        weight:1,
         destination_postal: '',
       },
       locations: {
@@ -419,21 +379,34 @@ export default {
         lng: location.latLng.lng(),
       }
     },
+    resetButton() {
+      this.post.photo = null
+      this.preview = null
+      this.$refs.myfile.value = null
+    },
+    previewImage(event) {
+      const input = event.target
+      if (input.files[0]) {
+        const reader = new FileReader()
+        reader.onload = e => {
+          this.preview = e.target.result
+        }
+        this.post.photo = input.files[0]
+        reader.readAsDataURL(input.files[0])
+      } else {
+        this.resetButton()
+      }
+    },
     addressChangedOrigin() {
       const self = this
       const bodyFormData = new FormData()
-      bodyFormData.append('address', this.post.destination_address)
+      bodyFormData.append('address', this.post.origin_address)
       this.$http.post(`${this.$processingURL}geocoding/server`, bodyFormData)
         .then(response => {
           const res = response.data
           if (res.status) {
-            self.locations.origin.center.lat = parseFloat(res.data.lat)
-            self.locations.origin.center.lng = parseFloat(res.data.lng)
-            self.locations.origin.center.zoom = 16
             self.post.origin_postal = res.data.postal_code
             self.post.origin_area = res.data.area
-            self.locations.origin.position.lat = parseFloat(res.data.lat)
-            self.locations.origin.position.lng = parseFloat(res.data.lng)
             this.$toast({
               component: ToastificationContent,
               props: {
@@ -452,12 +425,14 @@ export default {
       this.$http.post(`${this.$processingURL}geocoding/server`, bodyFormData)
         .then(response => {
           const res = response.data
+          console.log(res);
           if (res.status) {
             self.locations.destination.center.lat = parseFloat(res.data.lat)
             self.locations.destination.center.lng = parseFloat(res.data.lng)
             self.locations.destination.center.zoom = 16
             self.post.destination_postal = res.data.postal_code
             self.post.destination_area = res.data.area
+            self.post.destination_state = res.data.area
             self.locations.destination.position.lat = parseFloat(res.data.lat)
             self.locations.destination.position.lng = parseFloat(res.data.lng)
             this.$toast({
@@ -475,20 +450,26 @@ export default {
       return new Promise((resolve, reject) => {
         this.$refs.accountRules.validate().then(success => {
           if (success) {
+            const formData = new FormData()
             this.loading = true
             this.post.franchise_id = this.user.franchiseData.id
             this.post.user_id = this.user.user_id
 
-            this.post.origin_lat = this.locations.origin.position.lat
-            this.post.origin_lng = this.locations.origin.position.lng
-
             this.post.destination_lat = this.locations.destination.position.lat
             this.post.destination_lng = this.locations.destination.position.lng
-
-            this.$http.post(`${this.$appURL}create_order`, this.post)
+            for (const key in this.post) {
+              formData.append(key, this.post[key])
+            }
+            this.$http.post(`${this.$appURL}create_order_dhl`, formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                Accept: 'application/json',
+              },
+            })
               .then(response => {
                 this.loading = false
                 const res = response.data
+                console.log(res)
                 if (res.status) {
                   this.$toast({
                     component: ToastificationContent,

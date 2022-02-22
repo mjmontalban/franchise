@@ -9,11 +9,6 @@ export default [
     route: 'createorder',
     icon: 'PlusCircleIcon',
   },
-  // {
-  //   title: 'Delivery history',
-  //   route: 'history',
-  //   icon: 'ListIcon',
-  // },
   {
     title: 'Incoming Orders',
     route: 'incoming',
@@ -29,14 +24,41 @@ export default [
     route: 'dogenerate',
     icon: 'CastIcon',
   },
-  // {
-  //   title: 'Deduct Report',
-  //   route: 'deduct',
-  //   icon: 'FileMinusIcon',
-  // },
-  // {
-  //   title: 'Invoice',
-  //   route: 'invoice',
-  //   icon: 'InfoIcon',
-  // },
+  {
+    title: 'Singapore Orders',
+    icon: 'MapIcon',
+    children: [
+      {
+        title: 'Create Order',
+        route: 'createordersingapore',
+        icon: 'PlusCircleIcon',
+      },
+      {
+        title: 'Orders List',
+        route: 'outgoingsingapore',
+        icon: 'ArrowUpLeftIcon',
+      },
+      {
+        title: 'Generate DO',
+        route: 'dogeneratesingapore',
+        icon: 'CastIcon',
+      },
+    ],
+  },
+  {
+    title: 'DHL Orders',
+    icon: 'MapIcon',
+    children: [
+      {
+        title: 'Create DHL Order',
+        route: 'createorderdhl',
+        icon: 'PlusCircleIcon',
+      },
+      {
+        title: 'DHL Orders List',
+        route: 'dhlOrders',
+        icon: 'ArrowUpLeftIcon',
+      }
+    ]
+  },
 ]

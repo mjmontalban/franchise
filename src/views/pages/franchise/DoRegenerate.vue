@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div class="container">
     <div v-if="!loadingState">
       <b-card class="filters">
         <b-row>
-          <b-col
+          <!-- <b-col
             md="6"
           >
 
@@ -20,10 +20,9 @@
 
             </b-form-group>
 
-          </b-col>
+          </b-col> -->
           <b-col
             md="6"
-            class="text-right"
           >
 
             <b-button
@@ -61,8 +60,7 @@
           v-for="(order,index) in items"
           :key="index"
           class="breakme"
-          lg="4"
-          md="6"
+          md="12"
         >
           <b-card
             no-body
@@ -79,7 +77,7 @@
                 :src="$s3URL+'uploads/distributor/'+order.barcode"
                 alt="Barcode"
               >
-              <h3>F{{ order.order_id }}</h3>
+              <h3>{{ order.order_id }}</h3>
             </b-card-body>
             <b-card-body class="border-top">
               {{ order.from_franchise }}
@@ -167,10 +165,6 @@ export default {
   },
   data() {
     return {
-      post: {
-        pickup_date: moment().format('YYYY-MM-DD'),
-      },
-      pickup_date: moment().format('YYYY-MM-DD'),
       submitting: false,
       loadingState: true,
       totalRows: 0,
@@ -181,9 +175,9 @@ export default {
     }
   },
   watch: {
-    'post.pickup_date': function () {
-      this.getFranchisers()
-    },
+    // 'post.pickup_date': function () {
+    //   this.getFranchisers()
+    // },
   },
   created() {
     this.getFranchisers()
@@ -200,20 +194,16 @@ export default {
     getFranchisers() {
       const self = this
       self.loadingState = true
-      this.user = getUserData()
-      this.post.franchise_id = this.user.franchiseData.id
       // get setting e.i - George town etc. and postcode
-      this.$http.post(`${this.$appURL}doorders`, this.post).then(response => {
-        self.items = response.data.data
+      this.$http.get(`${this.$appURL}order/${this.$route.params.id}`).then(response => {
+        self.items.push(response.data.data.order)
         self.totalRows = self.items.length
         self.loadingState = false
       })
     },
-    applyFilter(selected) {
-      this.post.pickup_date = selected[0]
-      this.post.end_pickup_date = selected[1]
-      this.getFranchisers()
-    },
+    // applyFilter(selected) {
+    //   this.getFranchisers()
+    // },
     print() {
       window.print()
     },

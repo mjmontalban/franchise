@@ -6,8 +6,11 @@
     >
       <b-row v-if="!loadingState">
         <b-col
-        md="12">
-          <h3 class="m-1">Total Orders: {{ items.length }}</h3>
+          md="12"
+        >
+          <h3 class="m-1">
+            Total Orders: {{ items.length }}
+          </h3>
         </b-col>
         <b-col
           md="6"
@@ -68,14 +71,14 @@
             :filter-included-fields="filterOn"
             @filtered="onFiltered"
           >
-            <template #cell(order_id)="data">
+            <template #cell(id)="data">
               <b-badge variant="dark">
-                F{{ data.value }}
+                S{{ data.value }}
               </b-badge>
-               <a
+              <a
                 v-if="data.item.golog_id"
               ><b-badge variant="danger">
-                D{{ data.item.golog_id }}
+                {{ data.item.golog_id }}
               </b-badge>
               </a>
             </template>
@@ -100,7 +103,7 @@
                       />
                     </template>
                     <b-dropdown-item
-                      @click="viewTracking(data.item.order_id)"
+                      @click="viewTracking(data.item.unique)"
                     >
                       <feather-icon
                         icon="ListIcon"
@@ -109,13 +112,14 @@
                       <span>View Tracking</span>
                     </b-dropdown-item>
                     <b-dropdown-item
-                      @click="viewDetails(data.index)"
+                      v-if="data.item.status < 2"
+                      @click="cancelOrder(data.item.id)"
                     >
                       <feather-icon
-                        icon="EyeIcon"
+                        icon="XSquareIcon"
                         class="mr-50"
                       />
-                      <span>Quick View</span>
+                      <span>Cancel Order</span>
                     </b-dropdown-item>
                   </b-dropdown>
                 </span>
@@ -161,7 +165,7 @@
         >
           <p>
             ID: <b><b-badge variant="dark">
-              F{{ selected.order_id }}
+              {{ selected.order_id }}
             </b-badge></b><br>
             STATUS: <b-badge :variant="status[0][selected.status]">
               {{ status[1][selected.status] }}
@@ -223,7 +227,7 @@
 <script>
 import {
   BAlert, BRow, BCol, BBadge, BFormGroup, BButton, BSpinner, BTable, BPagination,
-  BInputGroup, BFormInput, BInputGroupAppend, BDropdown, BDropdownItem,
+  BInputGroup, BFormInput, BInputGroupAppend, BDropdown, BDropdownItem, BDropdownDivider,
   BCard,
 } from 'bootstrap-vue'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
@@ -239,6 +243,7 @@ export default {
   components: {
     flatPickr,
     BAlert,
+    BDropdownDivider,
     BCard,
     BSpinner,
     BButton,
@@ -275,29 +280,33 @@ export default {
       totalRows: 1,
       currentPage: 1,
       status: [['danger', 'dark', 'info', 'warning', 'success', 'dark', 'warning', 'success', 'info', 'danger', 'danger'],
-        ['invalid', 'Active', 'For Transfer', 'Picked by Lorry', 'Transferred', 'Assigned to Driver', 'For Last Mile', 'In Warehouse', 'For Pickup by Lorry', 'invalid', 'Cancelled']],
-       fields: [
+        ['invalid', 'Active', 'invalid', 'Assigned to Driver', 'Picked', 'Delivered', 'Completed', 'invalid', 'invalid', 'invalid', 'Cancelled']],
+      fields: [
         {
-            key: 'order_id',
-            label: 'ID',
-            sortable: true,
-          },
+          key: 'id',
+          label: 'ID',
+          sortable: true,
+        },
         {
-            key: 'pickup_name',
-            label: 'Sender Name',
-          },
-        'from_franchise',
-        'dropoff_name',
-        'dropoff_address',
-        'dropoff_postal',
+          key: 'sender',
+          label: 'Sender Name',
+        },
+        {
+          key: 'name',
+          label: 'Receiver Name',
+        },
+        {
+          key: 'address',
+          label: 'Receiver Address',
+        },
+        'postal_code',
         'qty',
         'status',
         {
-            key: 'arrival_date',
-            label: 'Arrival Date',
-            sortable: true,
-          },
-          'delivery_date',
+          key: 'pickup_datetime',
+          label: 'Pickup Date',
+          sortable: true,
+        },
         'actions',
       ],
       items: [],
@@ -324,20 +333,54 @@ export default {
       const self = this
       self.loadingState = true
       this.user = getUserData()
-      this.post.franchise_id = this.user.franchiseData.id
+      this.post.user_id = this.user.user_id
       // get setting e.i - George town etc. and postcode
-      this.$http.post(`${this.$appURL}inorders`, this.post).then(response => {
+      this.$http.post(`${this.$appURL}singapore_orders`, this.post).then(response => {
         self.items = response.data.data
         self.totalRows = self.items.length
         self.loadingState = false
       })
     },
     viewTracking(id) {
-      this.$router.push({ name: 'order', params: { id } })
+      window.open(`https://www.glogc.com/tracking/track_order/${id}`)
     },
     viewDetails(id) {
       this.selected = this.items[id]
       this.$bvModal.show('modal-xl')
+    },
+    cancelOrder(id) {
+      const self = this
+      this.$swal({
+        title: 'Are you sure to set this order to CANCELLED ?',
+        text: '',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        customClass: {
+          confirmButton: 'btn btn-primary',
+          cancelButton: 'btn btn-outline-danger ml-1',
+        },
+        buttonsStyling: false,
+      }).then(result => {
+        if (result.value) {
+          this.$http.post(`${this.$appURL}cancel_singapore_order`, { orderId: id })
+            .then(response => {
+              const res = response.data
+              // if (res.status) {
+              self.getFranchisers()
+              self.$toast({
+                component: ToastificationContent,
+                props: {
+                  title: res.message,
+                  icon: 'ThumbsUpIcon',
+                  variant: 'success',
+                },
+              })
+              // }
+            })
+        }
+      })
     },
   },
 }

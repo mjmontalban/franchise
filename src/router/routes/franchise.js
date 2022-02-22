@@ -29,6 +29,51 @@ export default [
       ],
     },
   },
+  {
+    path: '/franchise/create_order_singapore',
+    name: 'createordersingapore',
+    component: () => import('@/views/pages/franchise/CreateOrderSingapore.vue'),
+    meta: {
+      group: 11,
+      pageTitle: 'Create Singapore Order',
+      breadcrumb: [
+        {
+          text: 'Create Singapore Order',
+          active: true,
+        },
+      ],
+    },
+  },
+  {
+    path: '/franchise/outgoing_orders_singapore',
+    name: 'outgoingsingapore',
+    component: () => import('@/views/pages/franchise/OutgoingOrdersSingapore.vue'),
+    meta: {
+      group: 11,
+      pageTitle: 'Outgoing Singapore Orders',
+      breadcrumb: [
+        {
+          text: 'Outgoing Singapore Orders',
+          active: true,
+        },
+      ],
+    },
+  },
+  {
+    path: '/franchise/do_generate_singapore',
+    name: 'dogeneratesingapore',
+    component: () => import('@/views/pages/franchise/DoGenerateSingapore.vue'),
+    meta: {
+      group: 11,
+      pageTitle: 'Generate Singapore DO',
+      breadcrumb: [
+        {
+          text: 'Generate Singapore DO',
+          active: true,
+        },
+      ],
+    },
+  },
   // {
   //   path: '/franchise/delivery_history',
   //   name: 'history',
@@ -106,6 +151,23 @@ export default [
     },
   },
   {
+    path: '/franchise/generate/:id',
+    name: 'generatedo',
+    component: () => import('@/views/pages/franchise/DoRegenerate.vue'),
+    meta: {
+      // group: 11,
+      layout: 'full',
+      resource: 'Auth',
+      pageTitle: 'Generate DO',
+      breadcrumb: [
+        {
+          text: 'Generate DO',
+          active: true,
+        },
+      ],
+    },
+  },
+  {
     path: '/franchise/do_generate',
     name: 'dogenerate',
     component: () => import('@/views/pages/franchise/DoGenerate.vue'),
@@ -115,6 +177,36 @@ export default [
       breadcrumb: [
         {
           text: 'DO Generate',
+          active: true,
+        },
+      ],
+    },
+  },
+  {
+    path: '/franchise/create_order_dhl',
+    name: 'createorderdhl',
+    component: () => import('@/views/pages/franchise/CreateOrderDhl.vue'),
+    meta: {
+      group: 11,
+      pageTitle: 'Create DHL Order',
+      breadcrumb: [
+        {
+          text: 'Create DHL Order',
+          active: true,
+        },
+      ],
+    },
+  },
+  {
+    path: '/franchise/dhlOrders',
+    name: 'dhlOrders',
+    component: () => import('@/views/pages/franchise/DhlOrders.vue'),
+    meta: {
+      group: 11 ,
+      pageTitle: 'My DHL Orders',
+      breadcrumb: [
+        {
+          text: 'My DHL Orders',
           active: true,
         },
       ],

@@ -70,7 +70,7 @@
           >
             <b-card-body>
               <vuexy-logo class="float-left" />
-              <h4 class="float-left text-danger">Franchise</h4> 
+              <h4 class="float-left text-danger">Franchise (Singapore)</h4> 
             </b-card-body>
             <hr>
             <b-card-body>
@@ -79,24 +79,24 @@
                 :src="$s3URL+'uploads/distributor/'+order.barcode"
                 alt="Barcode"
               >
-              <h3>F{{ order.order_id }}</h3>
+              <h3>S{{ order.id }}</h3>
             </b-card-body>
             <b-card-body class="border-top">
-              {{ order.from_franchise }}
-              {{ order.pickup_address }}
+              <!-- Lot 8076, JP 12/24, Jalan Perdana 12, 83700 Yong Peng, Johor -->
+              {{order.pickupaddress}}
             </b-card-body>
             <b-card-body class="border-top">
-              {{ order.dropoff_name }} ({{ order.dropoff_phone }})
+              {{ order.name }} ({{ order.contact }})
             </b-card-body>
             <b-card-body class="border-top">
-              {{ order.dropoff_address }} {{ order.dropoff_postal }}
+              {{ order.address }} {{ order.postal_code }}
             </b-card-body>
             <b-row class="border-top">
               <b-col
                 sm="6"
                 class="border-right p-1"
               >
-                {{ order.remarks }}
+                {{ order.remark }}
               </b-col>
               <b-col
                 sm="6"
@@ -201,9 +201,10 @@ export default {
       const self = this
       self.loadingState = true
       this.user = getUserData()
-      this.post.franchise_id = this.user.franchiseData.id
+      this.post.user_id = this.user.user_id
+      this.post.filter = 10
       // get setting e.i - George town etc. and postcode
-      this.$http.post(`${this.$appURL}doorders`, this.post).then(response => {
+      this.$http.post(`${this.$appURL}singapore_orders`, this.post).then(response => {
         self.items = response.data.data
         self.totalRows = self.items.length
         self.loadingState = false

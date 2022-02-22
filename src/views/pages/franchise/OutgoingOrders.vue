@@ -6,8 +6,11 @@
     >
       <b-row v-if="!loadingState">
         <b-col
-        md="12">
-          <h3 class="m-1">Total Orders: {{ items.length }}</h3>
+          md="12"
+        >
+          <h3 class="m-1">
+            Total Orders: {{ items.length }}
+          </h3>
         </b-col>
         <b-col
           md="6"
@@ -70,8 +73,14 @@
           >
             <template #cell(order_id)="data">
               <b-badge variant="dark">
-                {{ data.value }}
+                F{{ data.value }}
               </b-badge>
+              <a
+                v-if="data.item.golog_id"
+              ><b-badge variant="danger">
+                D{{ data.item.golog_id }}
+              </b-badge>
+              </a>
             </template>
             <template #cell(status)="data">
               <b-badge :variant="status[0][data.value]">
@@ -111,7 +120,7 @@
                       />
                       <span>Quick View</span>
                     </b-dropdown-item>
-                    <b-dropdown-divider v-if="data.item.status < 2"></b-dropdown-divider>
+                    <b-dropdown-divider v-if="data.item.status < 2" />
                     <b-dropdown-item
                       v-if="data.item.status < 2"
                       @click="cancelOrder(data.item.order_id)"
@@ -166,7 +175,7 @@
         >
           <p>
             ID: <b><b-badge variant="dark">
-              {{ selected.order_id }}
+              F{{ selected.order_id }}
             </b-badge></b><br>
             STATUS: <b-badge :variant="status[0][selected.status]">
               {{ status[1][selected.status] }}
@@ -178,7 +187,7 @@
             <br>
             BARCODE: <span class="text-nowrap">
               <img
-                :src="$s3URL+selected.barcode"
+                :src="$s3URL+'uploads/distributor/'+selected.barcode"
                 alt="Barcode"
               >
             </span>
@@ -228,7 +237,7 @@
 <script>
 import {
   BAlert, BRow, BCol, BBadge, BFormGroup, BButton, BSpinner, BTable, BPagination,
-  BInputGroup, BFormInput, BInputGroupAppend, BDropdown, BDropdownItem,BDropdownDivider,
+  BInputGroup, BFormInput, BInputGroupAppend, BDropdown, BDropdownItem, BDropdownDivider,
   BCard,
 } from 'bootstrap-vue'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
@@ -280,18 +289,18 @@ export default {
       pageOptions: [10, 30, 50],
       totalRows: 1,
       currentPage: 1,
-      status: [['danger', 'dark', 'info', 'warning', 'success', 'dark','warning','success','danger','danger','danger'],
-        ['invalid', 'Active', 'For Transfer', 'Picked by Lorry', 'Transferred', 'Assigned to Driver','Picked by Driver','In Warehouse','invalid','invalid','Cancelled']],
+      status: [['danger', 'dark', 'info', 'warning', 'success', 'dark', 'warning', 'success', 'info', 'danger', 'danger'],
+        ['invalid', 'Active', 'For Transfer', 'Picked by Lorry', 'Transferred', 'Assigned to Driver', 'For Last Mile', 'In Warehouse', 'For Pickup by Lorry', 'invalid', 'Cancelled']],
       fields: [
         {
-            key: 'order_id',
-            label: 'ID',
-            sortable: true,
-          },
+          key: 'order_id',
+          label: 'ID',
+          sortable: true,
+        },
         {
-            key: 'pickup_name',
-            label: 'Sender Name',
-          },
+          key: 'pickup_name',
+          label: 'Sender Name',
+        },
         'to_franchise',
         'dropoff_name',
         'dropoff_address',
@@ -299,15 +308,11 @@ export default {
         'qty',
         'status',
         {
-            key: 'pickup_date',
-            label: 'Pickup Date',
-            sortable: true,
-          },
-        {
-            key: 'arrival_date',
-            label: 'Arrival Date',
-            sortable: true,
-          },
+          key: 'pickup_date',
+          label: 'Pickup Date',
+          sortable: true,
+        },
+        'delivery_date',
         'actions',
       ],
       items: [],
@@ -315,7 +320,7 @@ export default {
   },
   watch: {
     'post.pickup_date': function () {
-      this.getFranchisers();
+      this.getFranchisers()
     },
   },
   created() {
@@ -349,7 +354,7 @@ export default {
       this.selected = this.items[id]
       this.$bvModal.show('modal-xl')
     },
-    cancelOrder(id){
+    cancelOrder(id) {
       const self = this
       this.$swal({
         title: 'Are you sure to set this order to CANCELLED ?',
@@ -364,26 +369,25 @@ export default {
         },
         buttonsStyling: false,
       }).then(result => {
-        
         if (result.value) {
           this.$http.get(`${this.$appURL}cancelOrder/${id}`)
             .then(response => {
               const res = response.data
               // if (res.status) {
-                self.getFranchisers()
-                self.$toast({
-                  component: ToastificationContent,
-                  props: {
-                    title: res.message,
-                    icon: 'ThumbsUpIcon',
-                    variant: 'success',
-                  },
-                })
+              self.getFranchisers()
+              self.$toast({
+                component: ToastificationContent,
+                props: {
+                  title: res.message,
+                  icon: 'ThumbsUpIcon',
+                  variant: 'success',
+                },
+              })
               // }
             })
         }
       })
-    }
+    },
   },
 }
 </script>

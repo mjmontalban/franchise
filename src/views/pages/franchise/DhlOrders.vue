@@ -6,8 +6,11 @@
     >
       <b-row v-if="!loadingState">
         <b-col
-        md="12">
-          <h3 class="m-1">Total Orders: {{ items.length }}</h3>
+          md="12"
+        >
+          <h3 class="m-1">
+            Total Orders: {{ items.length }}
+          </h3>
         </b-col>
         <b-col
           md="6"
@@ -68,24 +71,25 @@
             :filter-included-fields="filterOn"
             @filtered="onFiltered"
           >
-            <template #cell(order_id)="data">
+            <template #cell(id)="data">
               <b-badge variant="dark">
-                F{{ data.value }}
-              </b-badge>
-               <a
-                v-if="data.item.golog_id"
-              ><b-badge variant="danger">
-                D{{ data.item.golog_id }}
-              </b-badge>
-              </a>
-            </template>
-            <template #cell(status)="data">
-              <b-badge :variant="status[0][data.value]">
-                {{ status[1][data.value] }}
+                {{ data.value }}
               </b-badge>
             </template>
+            <template #cell(shipment_id)="data">
+              <b-badge v-if="data.value" variant="success">
+                Generated
+              </b-badge>
+               <b-badge v-if="!data.value" variant="dark">
+                Not Generated
+              </b-badge>
+            </template>
+            
             <template #cell(actions)="data">
-              <span class="text-nowrap">
+              <b-badge v-if="data.item.status === 10" variant="danger">
+                Cancelled
+              </b-badge>
+              <span v-if="data.item.status != 10" class="text-nowrap">
                 <span>
                   <b-dropdown
                     variant="link"
@@ -100,7 +104,8 @@
                       />
                     </template>
                     <b-dropdown-item
-                      @click="viewTracking(data.item.order_id)"
+                      v-if="data.item.shipment_id"
+                      @click="viewTracking(data.item.deliveryid)"
                     >
                       <feather-icon
                         icon="ListIcon"
@@ -109,13 +114,34 @@
                       <span>View Tracking</span>
                     </b-dropdown-item>
                     <b-dropdown-item
-                      @click="viewDetails(data.index)"
+                       v-if="!data.item.shipment_id"
+                       @click="generateShippingLabel(data.item.deliveryid)"
                     >
                       <feather-icon
-                        icon="EyeIcon"
+                        icon="MoreVerticalIcon"
                         class="mr-50"
                       />
-                      <span>Quick View</span>
+                      <span>Generate Label</span>
+                    </b-dropdown-item>
+                    <b-dropdown-item
+                       v-if="data.item.shipment_id"
+                       @click="printLabel(data.item.label)"
+                    >
+                      <feather-icon
+                        icon="PrinterIcon"
+                        class="mr-50"
+                      />
+                      <span>Download Label</span>
+                    </b-dropdown-item>
+                    <b-dropdown-item
+                      v-if="!data.item.shipment_id"
+                      @click="cancelOrder(data.item.id)"
+                    >
+                      <feather-icon
+                       icon="XSquareIcon"
+                        class="mr-50"
+                      />
+                      <span>Cancel Order</span>
                     </b-dropdown-item>
                   </b-dropdown>
                 </span>
@@ -154,58 +180,12 @@
         id="modal-xl"
         hide-footer
         centered
-        :title="selected.id"
-      >
-        <b-card
-          title="Order Details"
-        >
-          <p>
-            ID: <b><b-badge variant="dark">
-              F{{ selected.order_id }}
-            </b-badge></b><br>
-            STATUS: <b-badge :variant="status[0][selected.status]">
-              {{ status[1][selected.status] }}
-            </b-badge><br>
-            DATE CREATED: <b>{{ selected.order_date }}</b><br>
-            PICKUP DATE: <b>{{ selected.pickup_date }}</b><br>
-            QUANTITY: <b>{{ selected.qty }}</b><br>
-            REMARKS: <b>{{ selected.remarks }}</b>
-            <br>
-            BARCODE: <span class="text-nowrap">
-              <img
-                :src="$s3URL+selected.barcode"
-                alt="Barcode"
-              >
-            </span>
-          </p>
-        </b-card>
-        <b-row>
-          <b-col>
-            <b-card
-              title="Origin"
-            >
-              <p>
-                Franchise: <b>{{ selected.from_franchise }}</b><br>
-                Name: <b>{{ selected.pickup_name }}</b><br>
-                Phone: <b>{{ selected.pickup_phone }}</b><br>
-                Address: <b>{{ selected.pickup_address }} {{ selected.pickup_postal }}</b>
-              </p>
-            </b-card>
-          </b-col>
-          <b-col>
-            <b-card
-              title="Destination"
-            >
-              <p>
-                Franchise: <b>{{ selected.to_franchise }}</b><br>
-                Name: <b>{{ selected.dropoff_name }}</b><br>
-                Phone: <b>{{ selected.dropoff_phone }}</b><br>
-                Address: <b>{{ selected.dropoff_address }} {{ selected.dropoff_postal }}</b>
-              </p>
-            </b-card>
-          </b-col>
-        </b-row>
-
+        title="Tracking Information"
+      > 
+        <ul v-for="(track,index) in tracking"
+          :key="index">
+            <li>{{track.description}} <br> <small>{{track.dateTime}}</small></li>
+        </ul>
       </b-modal>
       <div v-if="loadingState">
         <div class="d-flex justify-content-center mb-1">
@@ -216,6 +196,10 @@
         </div>
       </div>
     </b-card>
+    <!-- <b-overlay
+        :show="showOverlay"
+        no-wrap
+      /> -->
   </div>
 
 </template>
@@ -223,8 +207,9 @@
 <script>
 import {
   BAlert, BRow, BCol, BBadge, BFormGroup, BButton, BSpinner, BTable, BPagination,
-  BInputGroup, BFormInput, BInputGroupAppend, BDropdown, BDropdownItem,
+  BInputGroup, BFormInput, BInputGroupAppend, BDropdown, BDropdownItem, BDropdownDivider,
   BCard,
+  // BOverlay
 } from 'bootstrap-vue'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import Ripple from 'vue-ripple-directive'
@@ -237,8 +222,10 @@ import { getUserData } from '@/auth/utils'
 
 export default {
   components: {
+    // BOverlay,
     flatPickr,
     BAlert,
+    BDropdownDivider,
     BCard,
     BSpinner,
     BButton,
@@ -261,6 +248,8 @@ export default {
   },
   data() {
     return {
+      // showOverlay: false,
+      tracking : [],
       post: {
         pickup_date: moment().format('YYYY-MM-DD'),
       },
@@ -275,29 +264,32 @@ export default {
       totalRows: 1,
       currentPage: 1,
       status: [['danger', 'dark', 'info', 'warning', 'success', 'dark', 'warning', 'success', 'info', 'danger', 'danger'],
-        ['invalid', 'Active', 'For Transfer', 'Picked by Lorry', 'Transferred', 'Assigned to Driver', 'For Last Mile', 'In Warehouse', 'For Pickup by Lorry', 'invalid', 'Cancelled']],
-       fields: [
+        ['invalid', 'Active', 'invalid', 'Assigned to Driver', 'Picked', 'Delivered', 'Completed', 'invalid', 'invalid', 'invalid', 'Cancelled']],
+      fields: [
         {
-            key: 'order_id',
-            label: 'ID',
-            sortable: true,
-          },
+          key: 'id',
+          label: 'ORDER ID',
+          sortable: true,
+        },
         {
-            key: 'pickup_name',
-            label: 'Sender Name',
-          },
-        'from_franchise',
-        'dropoff_name',
-        'dropoff_address',
-        'dropoff_postal',
+          key: 'shipment_id',
+          label: 'Shipment',
+        },
+        {
+          key: 'name',
+          label: 'Receiver Name',
+        },
+        {
+          key: 'address',
+          label: 'Receiver Address',
+        },
+        'postcode',
         'qty',
-        'status',
         {
-            key: 'arrival_date',
-            label: 'Arrival Date',
-            sortable: true,
-          },
-          'delivery_date',
+          key: 'pickup_datetime',
+          label: 'Pickup Date',
+          sortable: true,
+        },
         'actions',
       ],
       items: [],
@@ -305,39 +297,130 @@ export default {
   },
   watch: {
     'post.pickup_date': function () {
-      this.getFranchisers()
+      this.getDhlOrders()
     },
   },
   created() {
-    this.getFranchisers()
+    this.getDhlOrders()
   },
   mounted() {
     this.totalRows = this.items.length
   },
   methods: {
+    printLabel(link){
+      window.open(link, '_blank');
+    },
     onFiltered(filteredItems) {
       // Trigger pagination to update the number of buttons/pages due to filtering
       this.totalRows = filteredItems.length
       this.currentPage = 1
     },
-    getFranchisers() {
+    getDhlOrders() {
       const self = this
       self.loadingState = true
       this.user = getUserData()
-      this.post.franchise_id = this.user.franchiseData.id
-      // get setting e.i - George town etc. and postcode
-      this.$http.post(`${this.$appURL}inorders`, this.post).then(response => {
+      this.post.user_id = this.user.user_id
+    
+      this.$http.post(`${this.$appURL}dhl_orders`, this.post).then(response => {
         self.items = response.data.data
         self.totalRows = self.items.length
         self.loadingState = false
       })
     },
     viewTracking(id) {
-      this.$router.push({ name: 'order', params: { id } })
+      let self = this;
+      this.$http.get(`${this.$appURL}trackOrder/${id}`)
+            .then(response => {
+              const res = response.data
+              if(!res.status){
+                self.$toast({
+                  component: ToastificationContent,
+                  props: {
+                    title: res.message,
+                    icon: 'ThumbsDownIcon',
+                    variant: 'danger',
+                  },
+                })
+              }else{
+                self.tracking = res.data.shipmentItems[0].events;
+              this.$bvModal.show('modal-xl');
+              }
+              // }
+            })
+    },
+    generateShippingLabel(id){
+      const self = this
+      // self.showOverlay = true;
+      this.$swal({
+        title: 'Are you sure to generate shipping label ?',
+        text: '',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        customClass: {
+          confirmButton: 'btn btn-primary',
+          cancelButton: 'btn btn-outline-danger ml-1',
+        },
+        buttonsStyling: false,
+      }).then(result => {
+        if (result.value) {
+          this.$http.get(`${this.$appURL}generateLabel/${id}`)
+            .then(response => {
+              const res = response.data
+              // if (res.status) {
+              // self.showOverlay = false;
+              self.getDhlOrders()
+              self.$toast({
+                component: ToastificationContent,
+                props: {
+                  title: res.message,
+                  icon: 'ThumbsUpIcon',
+                  variant: 'success',
+                },
+              })
+              // }
+            })
+        }
+      })
     },
     viewDetails(id) {
       this.selected = this.items[id]
       this.$bvModal.show('modal-xl')
+    },
+    cancelOrder(id) {
+      const self = this
+      this.$swal({
+        title: 'Are you sure to set this order to CANCELLED ?',
+        text: '',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        customClass: {
+          confirmButton: 'btn btn-primary',
+          cancelButton: 'btn btn-outline-danger ml-1',
+        },
+        buttonsStyling: false,
+      }).then(result => {
+        if (result.value) {
+          this.$http.get(`${this.$appURL}cancelOrder/${id}`)
+            .then(response => {
+              const res = response.data
+              // if (res.status) {
+              self.getDhlOrders()
+              self.$toast({
+                component: ToastificationContent,
+                props: {
+                  title: res.message,
+                  icon: 'ThumbsUpIcon',
+                  variant: 'success',
+                },
+              })
+              // }
+            })
+        }
+      })
     },
   },
 }

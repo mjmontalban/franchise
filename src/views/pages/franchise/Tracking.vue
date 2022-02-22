@@ -28,7 +28,7 @@
           >
             <p>
               ID: <b><b-badge variant="dark">
-                {{ selected.order_id }}
+                F{{ selected.order_id }}
               </b-badge></b><br>
               STATUS: <b-badge :variant="status[0][selected.status]">
                 {{ status[1][selected.status] }}
@@ -41,10 +41,11 @@
               <br>
               BARCODE: <span class="text-nowrap">
                 <img
-                  :src="$s3URL+selected.barcode"
+                  :src="$s3URL+'uploads/distributor/'+selected.barcode"
                   alt="Barcode"
                 >
               </span>
+              <button @click='doRegenerate' class="btn btn-info btn-sm">Reprint DO</button>
             </p>
           </b-card>
           <b-card
@@ -69,7 +70,18 @@
           </b-card>
         </b-col>
         <b-col>
+          <b-card v-if="selected.golog_id" title="Distributor">
+            <p>ID: <b>D{{selected.golog_id}}</b><br>Delivery Date: <b>{{selected.delivery_date}}</b></p>
+            <a
+            class="btn btn-sm btn-danger"
+              target="_blank"
+              :href="'https://www.glogc.com/tracking/distributor_tracking/'+selected.dist_tracking"
+            >
+              Distributor Tracking
+            </a>
+          </b-card>
           <b-card title="Tracking">
+
             <app-timeline>
               <app-timeline-item
                 v-for="(event,index) in tracking"
@@ -111,14 +123,18 @@ export default {
       loading: true,
       selected: {},
       tracking: [],
-      status: [['danger', 'dark', 'info', 'warning', 'success', 'dark','warning','success','danger','danger','danger'],
-        ['invalid', 'Active', 'For Transfer', 'Picked by Lorry', 'Transferred', 'Assigned to Driver','Picked by Driver','In Warehouse','invalid','invalid','Cancelled']],
+      status: [['danger', 'dark', 'info', 'warning', 'success', 'dark', 'warning', 'success', 'info', 'danger', 'danger'],
+        ['invalid', 'Active', 'For Transfer', 'Picked by Lorry', 'Transferred', 'Assigned to Driver', 'For Last Mile', 'In Warehouse', 'For Pickup by Lorry', 'invalid', 'Cancelled']],
     }
   },
   created() {
     this.fetchOrder()
   },
   methods: {
+    doRegenerate() {
+      let routeData = this.$router.resolve({name: 'generatedo', query: {id: this.$route.params.id}})
+      window.open(routeData.href, '_blank', 'width=700, height=1000')
+    },
     fetchOrder() {
       const self = this
       // get setting e.i - George town etc. and postcode
