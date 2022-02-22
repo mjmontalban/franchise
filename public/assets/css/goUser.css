@@ -1,0 +1,39 @@
+.btn-store {
+    color: #0a0a0a;
+    min-width: 154px;
+    padding: 6px 9px !important;
+    border-color:#0a0a0a !important;
+
+    height: 65px;
+    width: 180px;;
+    background-color: #f6f7f8;
+    display: inline-block;
+    padding-top: 8px;
+    border: 1px solid #575757;
+  }
+  
+  .btn-store:focus, 
+  .btn-store:hover {
+    color: #777777 !important;
+    background-color:#f6f7f8;
+    border-color: #f6f7f8 !important;
+  }
+
+  .btn-store .fa{
+    padding-top: 6px;
+  }
+  
+  .btn-store .btn-label{
+    text-align: left;
+    line-height: 1;
+    font-size: 12px;
+  }
+  .btn-store .btn-caption {
+    text-align: left;
+    line-height: 1;
+  }
+  
+  .btn-store .btn-caption {
+    font-size: 17px;
+    padding-left:0px;
+  }
